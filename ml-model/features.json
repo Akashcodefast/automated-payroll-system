@@ -1,0 +1,1 @@
+{"features": ["hours_worked", "leaves_taken", "experience_years", "base_salary"], "target": "salary"}
