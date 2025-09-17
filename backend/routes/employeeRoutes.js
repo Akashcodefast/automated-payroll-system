@@ -7,18 +7,21 @@ import {
   deleteEmployee,
 } from "../controllers/employeeController.js";
 
-import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
-
 const router = express.Router();
 
-// Admin only: manage employees
-router.get("/", authMiddleware, adminMiddleware, getEmployees);
-router.get("/:id", authMiddleware, adminMiddleware, getEmployeeById);
-router.post("/", authMiddleware, adminMiddleware, createEmployee);
-router.put("/:id", authMiddleware, adminMiddleware, updateEmployee);
-router.delete("/:id", authMiddleware, adminMiddleware, deleteEmployee);
-router.post("/", createEmployee);
+// all employees
 router.get("/", getEmployees);
-router.get("/", deleteEmployee);
+
+// single employee
+router.get("/:id", getEmployeeById);
+
+// create
+router.post("/", createEmployee);
+
+// update
+router.put("/:id", updateEmployee);
+
+// delete
+router.delete("/:id", deleteEmployee);
 
 export default router;

@@ -4,6 +4,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Reports from "./pages/Reports";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import "./output.css";
 
 export default function App() {
   return (

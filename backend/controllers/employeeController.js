@@ -1,108 +1,91 @@
 import Employee from "../models/Employee.js";
-import Attendance from "../models/Attendance.js";
-import Salary from "../models/Salary.js";
 
+// Get all employees (without password)
 // employeeController.js
-export const createEmployee = async (req, res) => {
-  try {
-    // Your logic here
-    res.json({ message: "Employee created successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
 export const getEmployees = async (req, res) => {
   try {
-    // Your logic here
-    res.json({ message: "All employees" });
+    const employees = await Employee.find().select("-password"); // hide password
+    res.json({ success: true, items: employees }); // must return items array
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
-export const deleteEmployee = async (req, res) => {
-  try {
-    // Your logic here
-    res.json({ message: "All employees" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+
+
+// Get employee by ID
 export const getEmployeeById = async (req, res) => {
   try {
-    // Your logic here
-    res.json({ message: "All employees" });
+    const employee = await Employee.findById(req.params.id).select("-password");
+    if (!employee) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
+    }
+    res.json({ success: true, data: employee });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error in getEmployeeById:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// Create new employee
+export const createEmployee = async (req, res) => {
+  try {
+    const { name, email, role, department, joinDate, salaryPerMonth, password } = req.body;
+
+    const exists = await Employee.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ success: false, message: "Email already exists" });
+    }
+
+    const employee = new Employee({
+      name,
+      email,
+      role,
+      department,
+      joinDate,
+      salaryPerMonth,
+      password, // ⚠️ TODO: hash with bcrypt before saving
+    });
+
+    await employee.save();
+
+    res.status(201).json({ success: true, data: employee });
+  } catch (err) {
+    console.error("Error in createEmployee:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Update employee
 export const updateEmployee = async (req, res) => {
   try {
-    // Your logic here
-    res.json({ message: "All employees" });
+    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!employee) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
+    }
+
+    res.json({ success: true, data: employee });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error in updateEmployee:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// Dashboard statistics
-export const getDashboardStats = async (_req, res) => {
+// Delete employee
+export const deleteEmployee = async (req, res) => {
   try {
-    const totalEmployees = await Employee.countDocuments();
-    const totalAttendance = await Attendance.countDocuments();
-    const totalSalaries = await Salary.countDocuments();
+    const employee = await Employee.findByIdAndDelete(req.params.id);
 
-    return res.json({
-      success: true,
-      data: { totalEmployees, totalAttendance, totalSalaries },
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch dashboard stats",
-      error: error.message,
-    });
-  }
-};
-
-// Manage roles
-export const manageRoles = async (req, res) => {
-  try {
-    const { employeeId } = req.params;
-    const { role } = req.body;
-
-    // Validate role
-    const validRoles = ["admin", "employee", "hr"];
-    if (!validRoles.includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid role. Allowed roles: ${validRoles.join(", ")}`,
-      });
+    if (!employee) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
     }
 
-    const updatedEmployee = await Employee.findByIdAndUpdate(
-      employeeId,
-      { role },
-      { new: true, runValidators: true }
-    ).select("-password");
-
-    if (!updatedEmployee) {
-      return res.status(404).json({
-        success: false,
-        message: "Employee not found",
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: "Role updated successfully",
-      data: updatedEmployee,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Role update failed",
-      error: error.message,
-    });
+    res.json({ success: true, message: "Employee deleted successfully" });
+  } catch (err) {
+    console.error("Error in deleteEmployee:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };

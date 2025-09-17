@@ -12,6 +12,8 @@ function getCurrentMonth() {
 
 export default function EmployeeDashboard() {
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     (async () => {
       try {
@@ -19,22 +21,40 @@ export default function EmployeeDashboard() {
         setLogs(data?.items || []);
       } catch (e) {
         setLogs([]);
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
+
   const role = localStorage.getItem("role") || "employee";
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div style={{ display: "flex" }}>
+      <div className="flex">
         <Sidebar role={role} />
-        <div style={{ padding: 16, width: "100%" }}>
-          <h2>Mark Attendance</h2>
-          <AttendanceCapture />
-          <h3 style={{ marginTop: 16 }}>My Recent Logs</h3>
-          <AttendanceTable logs={logs} />
-        </div>
+        <main className="flex-1 p-8 space-y-8">
+          {/* Attendance Capture Card */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <h1 className="text-2xl font-bold text-blue-700 mb-4">📝 Mark Attendance</h1>
+            <AttendanceCapture />
+          </div>
+
+          {/* Recent Attendance Logs */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">📋 My Recent Logs</h2>
+            {loading ? (
+              <p className="text-gray-500 text-center py-6">Loading attendance...</p>
+            ) : logs.length === 0 ? (
+              <p className="text-gray-500 text-center py-6">No attendance logs found.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <AttendanceTable logs={logs} />
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );
