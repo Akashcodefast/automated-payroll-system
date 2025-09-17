@@ -105,3 +105,53 @@ Commit changes (git commit -m 'Add feature')
 Push branch (git push origin feature-name)
 
 Create a Pull Request
+
+
+
+Do follow the schema that given below:
+
+
+MongoDB Admin Document:
+{
+  "_id": "68ca5e8fe1e649679578be23",
+  "name": "Akash",
+  "email": "1akashaakasha290@gmail.com",
+  "password": "$2b$10$J1ajaLapPAMDK9Boh3daHukZ82gpuuoJCQX73LxGSWP8wHi9qbJgS",
+  "createdAt": "2025-09-17T07:09:03.897Z",
+  "updatedAt": "2025-09-17T07:09:03.897Z",
+  "__v": 0
+}
+
+
+
+MongoDB Attendance Document:
+
+{
+  "_id": "68ca6ab9134c3026bae10181",
+  "name": "Nandeesha N M",
+  "email": "nandeeshanm04@gmail.com",
+  "password": "$2b$10$dZY5amMGGJQ/UM4YJjiu.ew/TY1wBHwVbLdrFbuf3rjUtIaAp5jCG",
+  "createdAt": "2025-09-17T08:00:57.890Z",
+  "updatedAt": "2025-09-17T08:00:57.890Z",
+  "__v": 0
+}
+
+MongoDB Employee Document:
+
+{
+  "_id": "68ca59be4f1bcb05fd025d8a",
+  "name": "Akash A",
+  "email": "akashaakash290@gmail.com",
+  "role": "employee",
+  "department": "HR",
+  "joinDate": "2025-09-17T06:48:30.428Z",
+  "salaryPerMonth": 45000,
+  "password": "$2b$10$KmNeyR4FN.TdDlw8WMJHR..kBzJ.YHA5ODFCM9pTaR4OxHlxeAmlu",
+  "faceImage": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEU…",
+  "createdAt": "2025-09-17T06:48:30.430Z",
+  "updatedAt": "2025-09-17T06:48:30.430Z",
+  "__v": 0
+}
+
+
+
