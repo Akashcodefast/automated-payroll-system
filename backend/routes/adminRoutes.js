@@ -1,17 +1,15 @@
 import express from "express";
-import {
-  getDashboardStats,
-  manageRoles,
-} from "../controllers/adminController.js";
-
-import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
+import { adminLogin, getDashboardStats,registerAdmin, manageRoles } from "../controllers/adminController.js";
+import { verifyAdminToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Admin dashboard stats
-router.get("/dashboard", authMiddleware, adminMiddleware, getDashboardStats);
+// Admin login
+router.post("/register", registerAdmin);
+router.post("/login", adminLogin);
 
-// Admin manage roles (promote/demote employee)
-router.put("/roles/:employeeId", authMiddleware, adminMiddleware, manageRoles);
+// Protect dashboard & role routes
+router.get("/dashboard", verifyAdminToken, getDashboardStats);
+router.put("/role/:employeeId", verifyAdminToken, manageRoles);
 
 export default router;

@@ -1,15 +1,16 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
+import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
-import Reports from "./pages/Reports";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import "./output.css";
+import Reports from "./pages/Reports";
+import  "./output.css"
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route path="/auth" element={<AuthPage />} />
+
       <Route
         path="/employee"
         element={
@@ -26,15 +27,16 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute allowed={["admin"]}>
-            <Reports />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+       <Route
+  path="/reports"
+  element={
+    <ProtectedRoute allowed={["admin"]}>
+      <Reports />
+    </ProtectedRoute>
+  }
+/>
+      {/* Redirect all other paths */}
+      <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   );
 }

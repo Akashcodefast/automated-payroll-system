@@ -4,7 +4,7 @@ import Sidebar from "../components/Layout/Sidebar";
 import EmployeeTable from "../components/Dashboard/EmployeeTable";
 import SalarySummary from "../components/Dashboard/SalarySummary";
 import PredictForm from "../components/Salary/PredictForm";
-import Register from "./Register";
+import Register from "./EmployeeRegister";
 
 export default function AdminDashboard() {
   const role = localStorage.getItem("role") || "admin";
@@ -17,10 +17,10 @@ export default function AdminDashboard() {
         <div className="flex-1 p-8 space-y-8">
           
           {/* Add Employee Section */}
-          <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-            <h1 className="text-2xl font-bold text-blue-700 mb-4">➕ Add Employee</h1>
-            <Register />
-          </div>
+         <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 max-h-[700px] overflow-y-auto">
+  <h1 className="text-2xl font-bold text-blue-700 mb-4">➕ Add Employee</h1>
+  <Register />
+</div>
 
           {/* Employees Table */}
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">

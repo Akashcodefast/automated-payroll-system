@@ -16,7 +16,7 @@ const EmployeeSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ["admin", "employee", "hr"], // you can adjust roles
+      enum: ["admin", "employee", "hr"],
       default: "employee",
     },
     department: {
@@ -33,7 +33,11 @@ const EmployeeSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true, // will be hashed using bcrypt
+      required: true, // hashed using bcrypt
+    },
+    faceImage: {
+      type: String, // store base64 string of face image
+      required: true,
     },
   },
   { timestamps: true }

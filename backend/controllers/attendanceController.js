@@ -1,78 +1,108 @@
 import Attendance from "../models/Attendance.js";
+import Employee from "../models/Employee.js";
+import * as faceapi from "face-api.js";
+import canvas from "canvas";
+import fetch from "node-fetch"; // needed for face-api.js
+import path from "path";
+import { fileURLToPath } from "url";
 
-// ✅ Mark Attendance (Clock-in / Clock-out)
+const { Canvas, Image, ImageData } = canvas;
+faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch });
+
+// Load models (call this once at server start)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const MODEL_PATH = path.join(__dirname, "../models/face"); // folder where face-api models are stored
+
+await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODEL_PATH);
+await faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_PATH);
+await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_PATH);
+
+/**
+ * Convert Base64 string to Canvas Image
+ */
+const base64ToImage = async (b64) => {
+  if (!b64) return null;
+  const img = new Image();
+  img.src = Buffer.from(b64.split(",")[1], "base64");
+  return img;
+};
+
+/**
+ * Compare two face images using embeddings
+ * Returns true if similarity > threshold
+ */
+const compareFaces = async (img1Base64, img2Base64) => {
+  const img1 = await base64ToImage(img1Base64);
+  const img2 = await base64ToImage(img2Base64);
+
+  if (!img1 || !img2) return false;
+
+  const desc1 = await faceapi.computeFaceDescriptor(img1);
+  const desc2 = await faceapi.computeFaceDescriptor(img2);
+
+  if (!desc1 || !desc2) return false;
+
+  const distance = faceapi.euclideanDistance(desc1, desc2);
+  return distance < 0.6; // threshold for same face
+};
+
 export const markAttendance = async (req, res) => {
   try {
-    const { employeeId, latitude, longitude, type } = req.body;
-    const imageUrl = req.file ? `/uploads/attendance/${req.file.filename}` : undefined;
+    const { type, imageUrl, location } = req.body;
+    if (!type || !location || !imageUrl)
+      return res.status(400).json({ message: "Missing required fields" });
 
-    if (!employeeId || !latitude || !longitude || !type) {
-      return res.status(400).json({ message: "All fields (employeeId, location, type) are required" });
-    }
+    const email = req.user?.email;
+    if (!email) return res.status(401).json({ message: "Unauthorized: missing email" });
 
-    // Get today's date (start & end of day)
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    const employee = await Employee.findOne({ email });
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
 
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    // Face verification
+    const faceMatch = await compareFaces(employee.faceImage, imageUrl);
+    if (!faceMatch) return res.status(401).json({ message: "Face mismatch! Attendance denied." });
 
-    // Check if employee already has attendance record for today
-    let record = await Attendance.findOne({
-      employee: employeeId,
-      createdAt: { $gte: startOfDay, $lte: endOfDay }
+    // Today's date (reset time)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let attendance = await Attendance.findOne({
+      employee: employee._id,
+      date: today,
     });
 
-    if (!record) {
-      // ✅ If no record exists, create new one
-      record = new Attendance({
-        employee: employeeId,
-        location: { latitude, longitude },
-        imageUrl,
-        clockIn: type === "clock-in" ? new Date() : undefined,
-        clockOut: type === "clock-out" ? new Date() : undefined
+    if (!attendance) {
+      attendance = new Attendance({
+        employee: employee._id,
+        date: today,
+        totalHours: 0,
       });
-    } else {
-      // ✅ If record exists, update it
-      if (type === "clock-in" && !record.clockIn) {
-        record.clockIn = new Date();
-        record.location = { latitude, longitude };
-        if (imageUrl) record.imageUrl = imageUrl;
-      }
-      if (type === "clock-out" && !record.clockOut) {
-        record.clockOut = new Date();
-        record.location = { latitude, longitude };
-        if (imageUrl) record.imageUrl = imageUrl;
-      }
     }
 
-    await record.save();
-    res.status(200).json({ message: "Attendance updated successfully", record });
-  } catch (e) {
-    res.status(400).json({ message: "Mark attendance failed", error: e.message });
-  }
-};
+    const now = new Date();
 
-// ✅ Get attendance by Employee
-export const getAttendanceByEmployee = async (req, res) => {
-  try {
-    const { employeeId } = req.params;
-    const records = await Attendance.find({ employee: employeeId })
-      .sort({ createdAt: -1 });
-    res.json(records);
-  } catch (e) {
-    res.status(500).json({ message: "Fetch failed", error: e.message });
-  }
-};
+    if (type === "in") {
+      attendance.checkIn = { time: now, imageUrl, location };
+    } else if (type === "out") {
+      if (!attendance.checkIn || !attendance.checkIn.time) {
+        return res.status(400).json({ message: "Cannot check-out before check-in" });
+      }
+      attendance.checkOut = { time: now, imageUrl, location };
 
-// ✅ Get all attendance (Admin)
-export const getAllAttendance = async (_req, res) => {
-  try {
-    const records = await Attendance.find()
-      .populate("employee", "name role email")
-      .sort({ createdAt: -1 });
-    res.json(records);
-  } catch (e) {
-    res.status(500).json({ message: "Fetch failed", error: e.message });
+      // Calculate hours
+      const diffMs = attendance.checkOut.time - attendance.checkIn.time;
+      attendance.totalHours = (attendance.totalHours || 0) + diffMs / 1000 / 60 / 60;
+    }
+
+    await attendance.save();
+
+    res.status(200).json({
+      message: `Attendance ${type} marked successfully`,
+      totalHours: attendance.totalHours,
+    });
+  } catch (err) {
+    console.error("Attendance error:", err);
+    res.status(500).json({ message: "Attendance marking failed", error: err.message });
   }
 };

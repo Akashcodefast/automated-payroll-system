@@ -9,19 +9,19 @@ import {
 
 const router = express.Router();
 
-// all employees
+// Get all employees
 router.get("/", getEmployees);
 
-// single employee
+// Get employee by ID
 router.get("/:id", getEmployeeById);
 
-// create
+// Create employee
 router.post("/", createEmployee);
 
-// update
+// Update employee
 router.put("/:id", updateEmployee);
 
-// delete
+// Delete employee
 router.delete("/:id", deleteEmployee);
 
 export default router;

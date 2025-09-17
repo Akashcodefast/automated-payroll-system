@@ -1,32 +1,21 @@
 import mongoose from "mongoose";
 
-const Attendance = new mongoose.Schema(
-  {
-    employee: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
-      required: true,
-    },
-    clockIn: {
-      type: Date,
-    },
-    clockOut: {
-      type: Date,
-    },
-    location: {
-      latitude: { type: Number },
-      longitude: { type: Number },
-    },
-    imageUrl: {
-      type: String, // stored image (selfie) path
-    },
-    status: {
-      type: String,
-      enum: ["present", "absent", "half-day"],
-      default: "present",
-    },
+const attendanceSchema = new mongoose.Schema({
+  employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
+  date: { type: Date, required: true },
+  checkIn: {
+    time: Date,
+    imageUrl: String,
+    location: { latitude: Number, longitude: Number },
   },
-  { timestamps: true }
-);
+  checkOut: {
+    time: Date,
+    imageUrl: String,
+    location: { latitude: Number, longitude: Number },
+  },
+  totalHours: { type: Number }, // hours worked
+});
 
+
+const Attendance = mongoose.model("Attendance", attendanceSchema);
 export default Attendance;
