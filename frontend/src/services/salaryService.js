@@ -1,13 +1,21 @@
 import api from "./api";
 
-// Predict salary for employee
+// Predict salary for an employee via Node.js backend
 export const predictForEmployee = (payload) =>
-  api.post("/api/salary/predict", payload);
+  api.post("/api/salary/predict", {
+    baseSalary: payload.baseSalary || 0,
+    hoursWorked: payload.hoursWorked || 160,
+    leavesTaken: payload.leavesTaken || 0,
+    experienceYears: payload.experienceYears || 1,
+  });
 
-// Get salary of an employee (latest or all, no month filter)
-export const getSalary = (employeeId) =>
-  api.get(`/api/salary/${employeeId}`);
 
-// Get salary report (all months or latest, depending on backend implementation)
-export const getMonthlyReport = () =>
-  api.get("/api/salary/report");
+// Get monthly salary report
+export const getMonthlyReport = (month) =>
+  api.get("/api/salary/report", {
+    params: { month: month || new Date().toISOString().slice(0, 7) },
+  });
+
+// Get employee details by email
+export const getEmployee = (email) =>
+  api.get(`/api/employee/email/${encodeURIComponent(email)}`);

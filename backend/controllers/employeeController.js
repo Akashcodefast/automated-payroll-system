@@ -1,94 +1,58 @@
+// backend/controllers/employeeController.js
+
 import Employee from "../models/Employee.js";
-import bcrypt from "bcryptjs";
 
-// Get all employees (without password)
-export const getEmployees = async (req, res) => {
-  try {
-    const employees = await Employee.find().select("-password");
-    res.json({ success: true, items: employees });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-// Get employee by ID
-export const getEmployeeById = async (req, res) => {
-  try {
-    const employee = await Employee.findById(req.params.id).select("-password");
-    if (!employee)
-      return res.status(404).json({ success: false, message: "Employee not found" });
-
-    res.json({ success: true, data: employee });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-// Create new employee
+// ✅ Create Employee
 export const createEmployee = async (req, res) => {
   try {
-    const { name, email, role, department, joinDate, salaryPerMonth, password, faceImage } =
-      req.body;
-
-    if (!faceImage)
-      return res.status(400).json({ success: false, message: "Face image is required" });
-
-    const exists = await Employee.findOne({ email });
-    if (exists)
-      return res.status(400).json({ success: false, message: "Email already exists" });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const employee = new Employee({
-      name,
-      email,
-      role,
-      department,
-      joinDate,
-      salaryPerMonth,
-      password: hashedPassword,
-      faceImage, // store base64
-    });
-
-    await employee.save();
-
-    res.status(201).json({ success: true, data: employee });
+    const { name, email, department, role } = req.body;
+    const newEmployee = new Employee({ name, email, department, role });
+    await newEmployee.save();
+    res.status(201).json(newEmployee);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ message: "Error creating employee", error: err.message });
   }
 };
 
-// Update employee
-export const updateEmployee = async (req, res) => {
+// ✅ Get All Employees
+export const getAllEmployees = async (req, res) => {
   try {
-    if (req.body.password) {
-      req.body.password = await bcrypt.hash(req.body.password, 10);
-    }
-
-    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
-
-    if (!employee)
-      return res.status(404).json({ success: false, message: "Employee not found" });
-
-    res.json({ success: true, data: employee });
+    const employees = await Employee.find();
+    res.status(200).json(employees);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ message: "Error fetching employees", error: err.message });
   }
 };
 
-// Delete employee
+// ✅ Get Single Employee by ID
+export const getEmployeeById = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
+    res.status(200).json(employee);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching employee", error: err.message });
+  }
+};
+
+// ✅ Get Employee by Email
+export const getEmployeeByEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const employee = await Employee.findOne({ email });
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
+    res.status(200).json(employee);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching employee by email", error: err.message });
+  }
+};
+
+// ✅ Delete Employee
 export const deleteEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndDelete(req.params.id);
-
-    if (!employee)
-      return res.status(404).json({ success: false, message: "Employee not found" });
-
-    res.json({ success: true, message: "Employee deleted successfully" });
+    await Employee.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Employee deleted successfully" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ message: "Error deleting employee", error: err.message });
   }
 };

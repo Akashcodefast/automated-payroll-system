@@ -48,4 +48,4 @@ if __name__ == '__main__':
     # Run on all interfaces to allow network access if needed
     app.run(host='0.0.0.0', port=5001, debug=True)
 
-# Invoke-RestMethod -Uri "http://127.0.0.1:5001/predict" -Method POST -ContentType "application/json" -InFile "test.json"
+# Invoke-RestMethod -Uri "http://127.0.0.1:5000/predict" -Method POST -ContentType "application/json" -InFile "test.json"

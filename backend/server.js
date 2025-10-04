@@ -45,11 +45,11 @@ app.get("/", (req, res) => {
   res.send("🚀 Payroll System API running...");
 });
 
-// DB
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected successfully"))
-  .catch((err) => console.error("MongoDB connection error:", err.message));
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err.message));
 
 // Global error handler
 app.use((err, req, res, next) => {
