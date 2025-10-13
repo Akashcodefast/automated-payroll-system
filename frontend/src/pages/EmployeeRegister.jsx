@@ -14,6 +14,7 @@ export default function Register() {
     role: "employee",
     department: "",
     salaryPerMonth: "",
+    faceImage: "",
   });
 
   const [showWebcam, setShowWebcam] = useState(false);
@@ -26,24 +27,30 @@ export default function Register() {
     const imageSrc = webcamRef.current.getScreenshot();
     setFormData((prev) => ({ ...prev, faceImage: imageSrc }));
     alert("Face captured!");
-    setShowWebcam(false); // hide webcam after capture
+    setShowWebcam(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/api/employee", formData);
-      alert("Employee added successfully!");
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        role: "employee",
-        department: "",
-        salaryPerMonth: "",
-      });
+      const res = await axios.post("http://localhost:8080/api/employee", formData);
+      if (res.data.success) {
+        alert("Employee added successfully!");
+        navigate("/employees");
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          role: "employee",
+          department: "",
+          salaryPerMonth: "",
+          faceImage: "",
+        });
+      } else {
+        alert(res.data.message || "Error adding employee");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Error:", err);
       alert("Error adding employee!");
     }
   };
@@ -105,7 +112,6 @@ export default function Register() {
         </select>
       </div>
 
-      {/* Button to toggle Webcam */}
       <button
         type="button"
         onClick={() => setShowWebcam(!showWebcam)}
@@ -114,28 +120,26 @@ export default function Register() {
         {showWebcam ? "Close Webcam" : "Open Webcam"}
       </button>
 
-      {/* Webcam section (shown only if showWebcam=true) */}
       {showWebcam && (
         <div className="my-4">
           <Webcam
             ref={webcamRef}
             screenshotFormat="image/jpeg"
-            className="rounded-lg border "
+            className="rounded-lg border"
           />
           <button
             type="button"
             onClick={handleCapture}
-            className="mt-2 bg-green-600 text-blue-400 px-4 py-2 rounded hover:bg-green-700"
+            className="mt-2 bg-green-600 text-blue px-4 py-2 rounded hover:bg-green-700"
           >
             Capture Image
           </button>
         </div>
       )}
 
-      {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-green-600 text-blue-600 py-2 rounded hover:bg-green-700"
+        className="w-full bg-green-600 py-2 rounded hover:bg-green-700"
       >
         Register Employee
       </button>

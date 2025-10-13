@@ -1,7 +1,6 @@
 // backend/controllers/salaryController.js
 import Salary from "../models/Salary.js";
 import axios from "axios";
-
 /**
  * Create Salary Record
  */

@@ -54,18 +54,16 @@
 //     </div>
 //   );
 // }
-
 import { useState } from "react";
 import { predictForEmployee, getEmployee } from "../../services/salaryService";
-  
-
 
 export default function PredictForm() {
-  const [form, setForm] = useState({ employeeId: "", month: "" });
+  const [form, setForm] = useState({ employeeEmail: "", month: "" });
   const [result, setResult] = useState(null);
   const [err, setErr] = useState("");
 
-  const onChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const onChange = (e) =>
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -73,24 +71,28 @@ export default function PredictForm() {
     setResult(null);
 
     try {
-      if (!form.employeeId) throw new Error("Employee ID is required");
+      if (!form.employeeEmail) throw new Error("Employee email is required");
 
-      // Fetch employee details from DB
-      const { data: employee } = await getEmployee(form.employeeId);
+      // 1️⃣ Fetch employee details by email
+      const { data: employeeRes } = await getEmployee(form.employeeEmail);
+      const employee = employeeRes.data;
 
       if (!employee) throw new Error("Employee not found");
 
+      // 2️⃣ Prepare payload for prediction
       const payload = {
-        baseSalary: employee.salaryPerMonth,
-        hoursWorked: 160,        // default or you can add to employee schema
-        leavesTaken: 0,           // default
-        experienceYears: 1        // default or calculate from joinDate
+        email: employee.email,                  // required for prediction service
+        baseSalary: employee.baseSalary ?? 30000, // fallback if DB value missing
+        hoursWorked: 160,                        // default or can be dynamic
+        leavesTaken: 0,                           // default
+        experienceYears: 4                        // default or calculate from join date
       };
 
+      // 3️⃣ Call prediction API
       const { data } = await predictForEmployee(payload);
       setResult(data);
-    } catch (e) {
-      setErr(e?.response?.data?.message || e.message || "Prediction failed");
+    } catch (err) {
+      setErr(err?.response?.data?.message || err.message || "Prediction failed");
     }
   };
 
@@ -101,8 +103,13 @@ export default function PredictForm() {
         style={{ display: "flex", gap: 8, alignItems: "end", flexWrap: "wrap" }}
       >
         <div>
-          <label>Employee ID</label><br />
-          <input name="employeeId" value={form.employeeId} onChange={onChange} required />
+          <label>Employee Email</label><br />
+          <input
+            name="employeeEmail"
+            value={form.employeeEmail}
+            onChange={onChange}
+            required
+          />
         </div>
         <div>
           <label>Month (YYYY-MM)</label><br />
@@ -126,4 +133,3 @@ export default function PredictForm() {
     </div>
   );
 }
-

@@ -9,7 +9,7 @@ export default function EmployeeTable() {
     (async () => {
       try {
         const res = await getEmployees();
-        setEmployees(res.data?.items || []);
+        setEmployees(res.data?.data || []);
       } catch (e) {
         console.error("Error fetching employees:", e);
         setEmployees([]);
