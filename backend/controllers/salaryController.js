@@ -1,6 +1,8 @@
 // backend/controllers/salaryController.js
 import Salary from "../models/Salary.js";
+import Employee from "../models/Employee.js"; // ✅ Import Employee model
 import axios from "axios";
+
 /**
  * Create Salary Record
  */
@@ -24,14 +26,6 @@ export const createSalaryRecord = async (req, res) => {
       });
     }
 
-    // Validate month format YYYY-MM
-    const monthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
-    if (!monthRegex.test(month)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Month must be in YYYY-MM format" });
-    }
-
     // Predict salary using ML API
     let predictedSalary = baseSalary;
     try {
@@ -42,12 +36,7 @@ export const createSalaryRecord = async (req, res) => {
         experience_years: experienceYears || 1,
       };
 
-      console.log("📡 Sending data to ML API:", payload);
-
-      const mlRes = await axios.post("http://127.0.0.1:5001/predict", payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-
+      const mlRes = await axios.post("http://127.0.0.1:5001/predict", payload);
       predictedSalary = mlRes.data.predicted_salary;
     } catch (err) {
       console.error("ML prediction failed:", err.message);
@@ -63,6 +52,9 @@ export const createSalaryRecord = async (req, res) => {
       deductions: deductions || 0,
       netSalary,
       predictedSalary,
+      hoursWorked: hoursWorked || 160,
+      leavesTaken: leavesTaken || 0,
+      experienceYears: experienceYears || 1,
     });
 
     res.status(201).json({ success: true, data: salary });
@@ -83,13 +75,6 @@ export const getMonthlyReport = async (req, res) => {
       return res.status(400).json({ success: false, message: "Month is required" });
     }
 
-    const monthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
-    if (!monthRegex.test(month)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Month must be in YYYY-MM format" });
-    }
-
     const report = await Salary.find({ month }).populate({
       path: "employee",
       select: "name email department",
@@ -103,16 +88,25 @@ export const getMonthlyReport = async (req, res) => {
 };
 
 /**
- * Predict Salary
+ * Predict Salary by Email & Save
  */
 export const predictSalaryController = async (req, res) => {
   try {
-    const { baseSalary, hoursWorked, leavesTaken, experienceYears } = req.body;
+    const { email, baseSalary, hoursWorked, leavesTaken, experienceYears, month } = req.body;
 
-    if (!baseSalary) {
-      return res.status(400).json({ success: false, message: "baseSalary is required" });
+    if (!email || !baseSalary) {
+      return res.status(400).json({ success: false, message: "email and baseSalary are required" });
     }
 
+    // ✅ Find employee by email
+    const employee = await Employee.findOne({ email });
+    if (!employee) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
+    }
+
+    const salaryMonth = month || new Date().toISOString().slice(0, 7);
+
+    // ML prediction payload
     const payload = {
       base_salary: baseSalary,
       hours_worked: hoursWorked || 160,
@@ -120,15 +114,32 @@ export const predictSalaryController = async (req, res) => {
       experience_years: experienceYears || 1,
     };
 
-    console.log("📡 Sending data to ML API:", payload);
+    const mlRes = await axios.post("http://127.0.0.1:5001/predict", payload);
+    const predictedSalary = baseSalary+mlRes.data.predicted_salary;
 
-    const mlRes = await axios.post("http://127.0.0.1:5001/predict", payload, {
-      headers: { "Content-Type": "application/json" },
-    });
+    // Save or update salary record
+    let salaryRecord = await Salary.findOne({ employee: employee._id, month: salaryMonth });
+    if (salaryRecord) {
+      salaryRecord.predictedSalary = predictedSalary;
+      salaryRecord = await salaryRecord.save();
+    } else {
+      salaryRecord = await Salary.create({
+        employee: employee._id,
+        month: salaryMonth,
+        baseSalary,
+        predictedSalary,
+        hoursWorked: payload.hours_worked,
+        leavesTaken: payload.leaves_taken,
+        experienceYears: payload.experience_years,
+        bonuses: 0,
+        deductions: 0,
+        netSalary: baseSalary,
+      });
+    }
 
-    res.status(200).json({ success: true, predictedSalary: mlRes.data.predicted_salary });
+    res.status(200).json({ success: true, data: salaryRecord });
   } catch (err) {
-    console.error("ML prediction failed:", err.message);
-    res.status(500).json({ success: false, message: "Salary prediction failed" });
+    console.error("Salary prediction failed:", err.message);
+    res.status(500).json({ success: false, message: "Salary prediction failed", error: err.message });
   }
 };

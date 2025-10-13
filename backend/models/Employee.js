@@ -8,7 +8,7 @@ const employeeSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ["admin", "employee"], default: "employee" },
   department: { type: String },
-  baseSalary: { type: Number },
+  baseSalary: { type: Number, required: true },
   faceImage: { type: String }, // base64 image from webcam
 });
 

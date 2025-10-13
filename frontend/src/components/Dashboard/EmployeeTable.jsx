@@ -89,7 +89,7 @@ export default function EmployeeTable() {
                 {e.department || "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                ${e.salaryPerMonth ?? "N/A"}
+                ${e.baseSalary ?? "N/A"}
               </td>
             </tr>
           ))}

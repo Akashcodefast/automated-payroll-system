@@ -10,20 +10,16 @@ export const getEmployee = (email) =>
 // Predict salary for an employee
 // =====================
 export const predictForEmployee = async (payload) => {
-  try {
-    if (!payload.email) throw new Error("Employee email is required for prediction");
-
-    return api.post("/api/salary/predict", {
-      baseSalary: payload.baseSalary ?? 0,
-      hoursWorked: payload.hoursWorked ?? 160,
-      leavesTaken: payload.leavesTaken ?? 0,
-      experienceYears: payload.experienceYears ?? 1,
-    });
-  } catch (err) {
-    console.error("Error predicting salary:", err);
-    throw err;
-  }
+  return api.post("/api/salary/predict", {
+    email: payload.email,
+    baseSalary: payload.baseSalary ?? 0,
+    hoursWorked: payload.hoursWorked ?? 160,
+    leavesTaken: payload.leavesTaken ?? 0,
+    experienceYears: payload.experienceYears ?? 1,
+    month: payload.month
+  });
 };
+
 
 // =====================
 // Get monthly salary report

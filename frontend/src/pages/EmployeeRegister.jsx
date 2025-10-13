@@ -13,7 +13,7 @@ export default function Register() {
     password: "",
     role: "employee",
     department: "",
-    salaryPerMonth: "",
+    baseSalary: "", // ✅ Correct field
     faceImage: "",
   });
 
@@ -26,26 +26,33 @@ export default function Register() {
   const handleCapture = () => {
     const imageSrc = webcamRef.current.getScreenshot();
     setFormData((prev) => ({ ...prev, faceImage: imageSrc }));
-    alert("Face captured!");
+    alert("Face captured successfully!");
     setShowWebcam(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ Convert salary to number to match backend schema
+    const payload = {
+      ...formData,
+      baseSalary: Number(formData.baseSalary),
+    };
+
     try {
-      const res = await axios.post("http://localhost:8080/api/employee", formData);
+      const res = await axios.post("http://localhost:8080/api/employee", payload);
       if (res.data.success) {
         alert("Employee added successfully!");
-        navigate("/employees");
         setFormData({
           name: "",
           email: "",
           password: "",
           role: "employee",
           department: "",
-          salaryPerMonth: "",
+          baseSalary: "",
           faceImage: "",
         });
+        navigate("/employees");
       } else {
         alert(res.data.message || "Error adding employee");
       }
@@ -56,7 +63,10 @@ export default function Register() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto p-4 bg-white rounded-lg shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-2xl mx-auto p-4 bg-white rounded-lg shadow"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           type="text"
@@ -67,6 +77,7 @@ export default function Register() {
           className="border p-2 rounded w-full focus:outline-blue-500"
           required
         />
+
         <input
           type="email"
           name="email"
@@ -76,6 +87,7 @@ export default function Register() {
           className="border p-2 rounded w-full focus:outline-blue-500"
           required
         />
+
         <input
           type="password"
           name="password"
@@ -85,6 +97,7 @@ export default function Register() {
           className="border p-2 rounded w-full focus:outline-blue-500"
           required
         />
+
         <input
           type="text"
           name="department"
@@ -93,14 +106,18 @@ export default function Register() {
           onChange={handleChange}
           className="border p-2 rounded w-full focus:outline-blue-500"
         />
+
+        {/* ✅ Corrected the name attribute */}
         <input
           type="number"
-          name="salaryPerMonth"
-          placeholder="Salary per Month"
-          value={formData.salaryPerMonth}
+          name="baseSalary"
+          placeholder="Base Salary"
+          value={formData.baseSalary}
           onChange={handleChange}
           className="border p-2 rounded w-full focus:outline-blue-500"
+          required
         />
+
         <select
           name="role"
           value={formData.role}
@@ -130,7 +147,7 @@ export default function Register() {
           <button
             type="button"
             onClick={handleCapture}
-            className="mt-2 bg-green-600 text-blue px-4 py-2 rounded hover:bg-green-700"
+            className="mt-2 bg-green-600 hover:bg-green-700"
           >
             Capture Image
           </button>
@@ -139,7 +156,7 @@ export default function Register() {
 
       <button
         type="submit"
-        className="w-full bg-green-600 py-2 rounded hover:bg-green-700"
+        className="w-full bg-green-600  hover:bg-green-700"
       >
         Register Employee
       </button>

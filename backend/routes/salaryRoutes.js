@@ -8,3 +8,4 @@ router.get("/report", getMonthlyReport); // GET with query param: ?month=YYYY-MM
 router.post("/predict", predictSalaryController); // POST for prediction
 
 export default router;
+

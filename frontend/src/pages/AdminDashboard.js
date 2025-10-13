@@ -32,7 +32,7 @@ export default function AdminDashboard() {
           {/* Monthly Salary Summary */}
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">💰 Monthly Salary Summary</h3>
-            <SalarySummary rows={[]} /> {/* Keep empty for now or implement separately */}
+            <SalarySummary/> {/* Keep empty for now or implement separately */}
           </div>
 
           {/* Predict Salary */}
