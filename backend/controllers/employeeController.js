@@ -11,24 +11,39 @@ export const createEmployee = async (req, res) => {
     // Check if employee already exists
     const existing = await Employee.findOne({ email });
     if (existing) {
-      return res.status(400).json({ success: false, message: "Employee already exists with this email" });
+      return res.status(400).json({
+        success: false,
+        message: "Employee already exists with this email",
+      });
     }
+
+    // Hash the password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const newEmployee = new Employee({
       name,
       email,
-      password,
+      password: hashedPassword, // save hashed password
       department,
       role,
-      baseSalary, // renamed from salaryPerMonth for consistency
+      baseSalary, // consistent field name
       faceImage,
     });
 
     await newEmployee.save();
-    res.status(201).json({ success: true, message: "Employee created successfully", data: newEmployee });
+    res.status(201).json({
+      success: true,
+      message: "Employee created successfully",
+      data: newEmployee,
+    });
   } catch (err) {
     console.error("Error creating employee:", err);
-    res.status(500).json({ success: false, message: "Error creating employee", error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Error creating employee",
+      error: err.message,
+    });
   }
 };
 
@@ -41,7 +56,11 @@ export const getAllEmployees = async (req, res) => {
     res.status(200).json({ success: true, data: employees });
   } catch (err) {
     console.error("Error fetching employees:", err);
-    res.status(500).json({ success: false, message: "Error fetching employees", error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching employees",
+      error: err.message,
+    });
   }
 };
 
@@ -51,11 +70,16 @@ export const getAllEmployees = async (req, res) => {
 export const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
-    if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+    if (!employee)
+      return res.status(404).json({ success: false, message: "Employee not found" });
     res.status(200).json({ success: true, data: employee });
   } catch (err) {
     console.error("Error fetching employee by ID:", err);
-    res.status(500).json({ success: false, message: "Error fetching employee", error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching employee",
+      error: err.message,
+    });
   }
 };
 
@@ -66,11 +90,16 @@ export const getEmployeeByEmail = async (req, res) => {
   try {
     const { email } = req.params;
     const employee = await Employee.findOne({ email });
-    if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+    if (!employee)
+      return res.status(404).json({ success: false, message: "Employee not found" });
     res.status(200).json({ success: true, data: employee });
   } catch (err) {
     console.error("Error fetching employee by email:", err);
-    res.status(500).json({ success: false, message: "Error fetching employee by email", error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching employee by email",
+      error: err.message,
+    });
   }
 };
 
@@ -83,6 +112,10 @@ export const deleteEmployee = async (req, res) => {
     res.status(200).json({ success: true, message: "Employee deleted successfully" });
   } catch (err) {
     console.error("Error deleting employee:", err);
-    res.status(500).json({ success: false, message: "Error deleting employee", error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting employee",
+      error: err.message,
+    });
   }
 };
