@@ -115,7 +115,8 @@ export const predictSalaryController = async (req, res) => {
     };
 
     const mlRes = await axios.post("http://127.0.0.1:5001/predict", payload);
-    const predictedSalary = baseSalary+mlRes.data.predicted_salary;
+    const predictedSalary = Math.max(baseSalary, mlRes.data.predicted_salary);
+
 
     // Save or update salary record
     let salaryRecord = await Salary.findOne({ employee: employee._id, month: salaryMonth });
