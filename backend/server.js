@@ -27,7 +27,11 @@ if (!fs.existsSync(uploadsPath)) {
 }
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "*",   // or specific domain: ["https://your-frontend.vercel.app"]
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Static uploads
