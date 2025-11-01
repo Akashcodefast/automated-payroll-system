@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
+  baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080"
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -13,7 +14,7 @@ export default function AdminLogin() {
     e.preventDefault();
     console.log("Submitting login:", formData); // Debug
     try {
-      const res = await axios.post("https://automated-payroll-system.onrender.com/api/admin/login", formData, {
+      const res = await axios.post("baseURL/api/admin/login", formData, {
         headers: { "Content-Type": "application/json" },
       });
       localStorage.setItem("token", res.data.token);
