@@ -17,9 +17,18 @@ export default function EmployeeDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await getMyAttendance(getCurrentMonth());
-        setLogs(data?.items || []);
-      } catch (e) {
+        const response = await getMyAttendance(getCurrentMonth());
+        console.log("✅ Full Attendance API Response:", response);
+
+        // 🔹 The backend sometimes returns a single object instead of an array
+        const record = response.data?.data || response.data?.items || response.data || null;
+        console.log("🧾 Attendance Logs:", record);
+
+        // 🔹 Always normalize into an array
+        const items = Array.isArray(record) ? record : record ? [record] : [];
+        setLogs(items);
+      } catch (error) {
+        console.error("❌ Error fetching attendance:", error);
         setLogs([]);
       } finally {
         setLoading(false);
@@ -35,19 +44,27 @@ export default function EmployeeDashboard() {
       <div className="flex">
         <Sidebar role={role} />
         <main className="flex-1 p-8 space-y-8">
-          {/* Attendance Capture Card */}
+          {/* Attendance Capture */}
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-            <h1 className="text-2xl font-bold text-blue-700 mb-4">📝 Mark Attendance</h1>
+            <h1 className="text-2xl font-bold text-blue-700 mb-4">
+              📝 Mark Attendance
+            </h1>
             <AttendanceCapture />
           </div>
 
-          {/* Recent Attendance Logs */}
+          {/* Attendance Logs */}
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">📋 My Recent Logs</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              📋 My Recent Logs
+            </h2>
             {loading ? (
-              <p className="text-gray-500 text-center py-6">Loading attendance...</p>
+              <p className="text-gray-500 text-center py-6">
+                Loading attendance...
+              </p>
             ) : logs.length === 0 ? (
-              <p className="text-gray-500 text-center py-6">No attendance logs found.</p>
+              <p className="text-gray-500 text-center py-6">
+                No attendance logs found.
+              </p>
             ) : (
               <div className="overflow-x-auto">
                 <AttendanceTable logs={logs} />

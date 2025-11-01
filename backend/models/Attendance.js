@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 
 const attendanceSchema = new mongoose.Schema({
-  employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
+  // ✅ store employee email directly instead of ObjectId
+  employee: { type: String, required: true },
+
   date: { type: Date, required: true },
   checkIn: {
     time: Date,
@@ -15,7 +17,6 @@ const attendanceSchema = new mongoose.Schema({
   },
   totalHours: { type: Number }, // hours worked
 });
-
 
 const Attendance = mongoose.model("Attendance", attendanceSchema);
 export default Attendance;

@@ -44,7 +44,7 @@ app.use("/api/salary", salaryRoutes);
 app.get("/", (req, res) => {
   res.send("🚀 Payroll System API running...");
 });
-
+console.log("📦 Mongo URI in use:", process.env.MONGO_URI);
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)

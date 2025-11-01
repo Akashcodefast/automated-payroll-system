@@ -7,7 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 
-dotenv.config(); // loads FIXED_LAT and FIXED_LNG from .env
+dotenv.config();
 
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch });
@@ -27,7 +27,7 @@ await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_PATH);
 // Helpers
 // -------------------------
 
-// Base64 → Image
+// Convert Base64 to Image
 const base64ToImage = async (b64) => {
   if (!b64) return null;
   const img = new Image();
@@ -35,7 +35,7 @@ const base64ToImage = async (b64) => {
   return img;
 };
 
-// Compare faces with relaxed threshold
+// Compare two face images
 const compareFaces = async (img1Base64, img2Base64) => {
   try {
     const img1 = await base64ToImage(img1Base64);
@@ -48,22 +48,38 @@ const compareFaces = async (img1Base64, img2Base64) => {
 
     const distance = faceapi.euclideanDistance(desc1, desc2);
     console.log("Face distance:", distance.toFixed(4));
-    return distance < 0.75; // relaxed threshold
+    return distance < 0.75;
   } catch (err) {
     console.error("Face compare failed:", err.message);
     return false;
   }
 };
 
-// Haversine formula to check location
+// Location validation using Haversine formula
+// Location validation using Haversine formula
 const isLocationValid = (userLoc, allowedRadiusM = 50) => {
   const FIXED_LAT = parseFloat(process.env.FIXED_LAT || "12.984136956511366");
   const FIXED_LNG = parseFloat(process.env.FIXED_LNG || "77.50821149193435");
 
-  if (!userLoc?.latitude || !userLoc?.longitude) return false;
+  if (!userLoc?.latitude || !userLoc?.longitude) {
+    console.log("❌ Invalid user location received:", userLoc);
+    return false;
+  }
+
+  // 🛰️ Log all location details clearly
+  console.log("📍 Location Check Details:");
+  console.log("--------------------------");
+  console.log("✅ Fixed Office Location:", {
+    latitude: FIXED_LAT,
+    longitude: FIXED_LNG,
+  });
+  console.log("✅ User Current Location:", {
+    latitude: userLoc.latitude,
+    longitude: userLoc.longitude,
+  });
 
   const toRad = (deg) => (deg * Math.PI) / 180;
-  const R = 6371000; // Earth radius in meters
+  const R = 6371000; // radius of Earth in meters
 
   const dLat = toRad(userLoc.latitude - FIXED_LAT);
   const dLon = toRad(userLoc.longitude - FIXED_LNG);
@@ -73,10 +89,14 @@ const isLocationValid = (userLoc, allowedRadiusM = 50) => {
       Math.cos(toRad(userLoc.latitude)) *
       Math.sin(dLon / 2) ** 2;
   const distance = 2 * R * Math.asin(Math.sqrt(a));
-  console.log("Distance from office (m):", distance.toFixed(2));
+
+  console.log("📏 Distance from office (meters):", distance.toFixed(2));
+  console.log("✅ Allowed radius (meters):", allowedRadiusM);
+  console.log("--------------------------\n");
 
   return distance <= allowedRadiusM;
 };
+
 
 // -------------------------
 // Mark Attendance
@@ -95,7 +115,7 @@ export const markAttendance = async (req, res) => {
     if (!employee)
       return res.status(404).json({ message: "Employee not found" });
 
-    // ✅ Validate location (allow 100 m for testing auto-checkout)
+    // ✅ Location validation (100m radius for testing)
     if (!isLocationValid(location, 100)) {
       return res.status(401).json({
         message: "❌ Location mismatch. You are not near the office.",
@@ -110,13 +130,13 @@ export const markAttendance = async (req, res) => {
       });
     }
 
-    // ✅ Attendance logic
+    // ✅ Attendance logic (by email)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let attendance = await Attendance.findOne({ employee: employee._id, date: today });
+    let attendance = await Attendance.findOne({ employee: email, date: today });
     if (!attendance) {
-      attendance = new Attendance({ employee: employee._id, date: today, totalHours: 0 });
+      attendance = new Attendance({ employee: email, date: today, totalHours: 0 });
     }
 
     const now = new Date();
@@ -149,29 +169,48 @@ export const markAttendance = async (req, res) => {
 export const getMyAttendance = async (req, res) => {
   try {
     const email = req.user?.email;
-    if (!email)
+    // console.log("📥 Logged-in user:", email);
+
+    if (!email) {
       return res.status(401).json({ message: "Unauthorized: missing email" });
+    }
 
-    const employee = await Employee.findOne({ email });
-    if (!employee)
-      return res.status(404).json({ message: "Employee not found" });
+    // ✅ Fetch all records for this employee
+    const records = await Attendance.find({ employee: email })
+      .sort({ date: -1 }) // latest first
+      .lean();
 
-    const { month } = req.query; // format: "YYYY-MM"
-    if (!month)
-      return res.status(400).json({ message: "Month query param required" });
+    // console.log("📊 Attendance records found:", records.length);
 
-    const [year, m] = month.split("-").map(Number);
-    const start = new Date(year, m - 1, 1);
-    const end = new Date(year, m, 0, 23, 59, 59, 999);
+    if (!records.length) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: `📭 No attendance logs found for ${email}.`,
+      });
+    }
 
-    const records = await Attendance.find({
-      employee: employee._id,
-      date: { $gte: start, $lte: end },
-    }).sort({ date: -1 });
+    // ✅ Pick the latest record only
+    const latest = records[0];
+    // console.log("🗓 Latest attendance record:", latest);
 
-    res.status(200).json({ records });
+    // ✅ Send only necessary fields
+    res.status(200).json({
+      success: true,
+      data: {
+        date: latest.date,
+        checkIn: latest.checkIn,
+        checkOut: latest.checkOut,
+        totalHours: latest.totalHours || 0,
+      },
+      message: "✅ Latest attendance fetched successfully",
+    });
   } catch (err) {
-    console.error("Get attendance error:", err);
-    res.status(500).json({ message: "Failed to get attendance", error: err.message });
+    console.error("❌ Get attendance error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch attendance logs",
+      error: err.message,
+    });
   }
 };
