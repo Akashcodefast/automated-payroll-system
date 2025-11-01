@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
 
 export default function Register() {
-const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080";
+const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-system.onrender.com";
 
   const navigate = useNavigate();
   const webcamRef = useRef(null);

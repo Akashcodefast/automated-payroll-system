@@ -7,7 +7,7 @@ export default function AdminLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   
-  const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080";
+  const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-system.onrender.com";
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {

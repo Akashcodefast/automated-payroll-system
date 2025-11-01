@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminRegister() {
-  const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080";
+  const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-system.onrender.com";
 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create axios instance with backend base URL
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080",
+  baseURL: process.env.REACT_APP_API_BASE || "https://automated-payroll-system.onrender.com",
 });
 
 // Add authorization token from localStorage to every request header if exists
