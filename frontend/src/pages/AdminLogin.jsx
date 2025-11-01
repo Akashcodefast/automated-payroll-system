@@ -14,7 +14,7 @@ export default function AdminLogin() {
     e.preventDefault();
     console.log("Submitting login:", formData); // Debug
     try {
-      const res = await axios.post(`${baseURL}/api/admin/login`, formData, {
+      const res = await axios.post(`https://automated-payroll-system.onrender.com/api/admin/login`, formData, {
         headers: { "Content-Type": "application/json" },
       });
       localStorage.setItem("token", res.data.token);

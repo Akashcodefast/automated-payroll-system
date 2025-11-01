@@ -42,7 +42,7 @@ const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-sys
     };
 
     try {
-      const res = await axios.post(`${baseURL}/api/employee`, payload);
+      const res = await axios.post(`https://automated-payroll-system.onrender.com/api/employee`, payload);
       if (res.data.success) {
         alert("Employee added successfully!");
         setFormData({

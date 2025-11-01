@@ -15,7 +15,7 @@ export default function AdminRegister() {
     e.preventDefault();
     console.log("Submitting admin data:", formData); // Debug
     try {
-      await axios.post(`${baseURL}/api/admin/register`, formData, {
+      await axios.post(`https://automated-payroll-system.onrender.com/api/admin/register`, formData, {
         headers: { "Content-Type": "application/json" },
       });
       navigate("/auth"); // back to auth page
