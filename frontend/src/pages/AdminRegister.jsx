@@ -3,7 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminRegister() {
-  baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080"
+  const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080";
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
@@ -14,7 +15,7 @@ export default function AdminRegister() {
     e.preventDefault();
     console.log("Submitting admin data:", formData); // Debug
     try {
-      await axios.post("baseURL/api/admin/register", formData, {
+      await axios.post(`${baseURL}/api/admin/register`, formData, {
         headers: { "Content-Type": "application/json" },
       });
       navigate("/auth"); // back to auth page

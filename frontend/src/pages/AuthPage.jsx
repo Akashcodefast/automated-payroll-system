@@ -5,7 +5,8 @@ import EmployeeLogin from "./EmployeeLogin";
 import EmployeeRegister from "./EmployeeRegister";
 
 export default function AuthPage() {
-   baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080"
+   const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080";
+
   const [activeTab, setActiveTab] = useState("employeeLogin");
 
   return (

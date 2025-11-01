@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
 
 export default function Register() {
-  baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080"
+const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8080";
+
   const navigate = useNavigate();
   const webcamRef = useRef(null);
 
@@ -41,7 +42,7 @@ export default function Register() {
     };
 
     try {
-      const res = await axios.post("baseURL/api/employee", payload);
+      const res = await axios.post(`${baseURL}/api/employee`, payload);
       if (res.data.success) {
         alert("Employee added successfully!");
         setFormData({
