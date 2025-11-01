@@ -9,7 +9,7 @@ backend/.env
 
 # ML Model
 ml-model/__pycache__/
-ml-model/.venv/
+ml-model/venv
 ml-model/.env
 ml-model/*.pyc
 ml-model/.ipynb_checkpoints/
