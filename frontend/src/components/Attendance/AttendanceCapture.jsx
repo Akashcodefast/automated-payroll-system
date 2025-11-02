@@ -14,7 +14,7 @@ export default function AttendanceCapture() {
   const consecutiveFarRef = useRef(0);
   const autoCheckoutDoneRef = useRef(false);
 
-  const AUTO_CHECKOUT_DISTANCE_M = 10000; // 10 km
+  const AUTO_CHECKOUT_DISTANCE_M = 100; // 10 km
   const REQUIRED_CONSECUTIVE = 2;
   const OFFICE_COORDS = { lat: 12.9841110, lng: 77.5084420 }; // Example: Bangalore office
 
