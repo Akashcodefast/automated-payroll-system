@@ -7,6 +7,7 @@ export default function AttendanceCapture() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [showCamera, setShowCamera] = useState(false);
+  const [isCheckedIn, setIsCheckedIn] = useState(false); // ✅ Track state
 
   const watchIntervalRef = useRef(null);
   const lastLocationRef = useRef(null);
@@ -15,8 +16,9 @@ export default function AttendanceCapture() {
 
   const AUTO_CHECKOUT_DISTANCE_M = 10000; // 10 km
   const REQUIRED_CONSECUTIVE = 2;
-  const OFFICE_COORDS = { lat: 12.9716, lng: 77.5946 };
+  const OFFICE_COORDS = { lat: 12.9841110, lng: 77.5084420 }; // Example: Bangalore office
 
+  // ✅ Haversine formula to calculate distance in meters
   const haversineDistanceMeters = (lat1, lon1, lat2, lon2) => {
     const R = 6371000;
     const toRad = (v) => (v * Math.PI) / 180;
@@ -30,16 +32,18 @@ export default function AttendanceCapture() {
 
   const getCurrentPosition = (options = {}) =>
     new Promise((resolve, reject) => {
-      if (!navigator.geolocation) return reject(new Error("Geolocation not supported"));
+      if (!navigator.geolocation)
+        return reject(new Error("Geolocation not supported"));
       navigator.geolocation.getCurrentPosition(resolve, reject, options);
     });
 
+  // ✅ Poll location every 5 seconds
   const startLocationPolling = () => {
     stopLocationPolling();
     consecutiveFarRef.current = 0;
     autoCheckoutDoneRef.current = false;
     sampleLocationAndMaybeAutoCheckout();
-    watchIntervalRef.current = setInterval(sampleLocationAndMaybeAutoCheckout, 1000);
+    watchIntervalRef.current = setInterval(sampleLocationAndMaybeAutoCheckout, 5000); // 🔁 every 5 sec
   };
 
   const stopLocationPolling = () => {
@@ -50,6 +54,7 @@ export default function AttendanceCapture() {
     consecutiveFarRef.current = 0;
   };
 
+  // ✅ Check geolocation and console log
   const sampleLocationAndMaybeAutoCheckout = async () => {
     if (busy || autoCheckoutDoneRef.current) return;
 
@@ -59,11 +64,19 @@ export default function AttendanceCapture() {
         maximumAge: 0,
         timeout: 5000,
       });
+
       const { latitude, longitude, accuracy } = pos.coords;
       lastLocationRef.current = { latitude, longitude, accuracy, timestamp: Date.now() };
 
-      const dist = haversineDistanceMeters(latitude, longitude, OFFICE_COORDS.lat, OFFICE_COORDS.lng);
-      console.log("📍 Location poll:", latitude, longitude, "→", dist.toFixed(2), "m");
+      console.log(`📍 Current Location: lat=${latitude}, lng=${longitude}`);
+
+      const dist = haversineDistanceMeters(
+        latitude,
+        longitude,
+        OFFICE_COORDS.lat,
+        OFFICE_COORDS.lng
+      );
+      console.log("📏 Distance from office:", dist.toFixed(2), "m");
 
       if (accuracy > AUTO_CHECKOUT_DISTANCE_M * 2) return;
 
@@ -95,8 +108,9 @@ export default function AttendanceCapture() {
     return null;
   };
 
+  // ✅ Auto-checkout logic
   const performAutoCheckout = async () => {
-    if (busy) return;
+    if (busy || !isCheckedIn) return;
     setBusy(true);
     try {
       setMsg("⚠️ Auto check-out: leaving office area...");
@@ -106,6 +120,7 @@ export default function AttendanceCapture() {
       const payload = { type: "out", imageUrl: image, location: lastLocationRef.current };
       await checkOut(payload);
       setMsg("✅ Auto check-out completed.");
+      setIsCheckedIn(false);
       stopLocationPolling();
     } catch (e) {
       console.error("Auto-checkout error:", e);
@@ -115,13 +130,29 @@ export default function AttendanceCapture() {
     }
   };
 
+  // ✅ Main attendance handler
   const handleAttendance = async (type) => {
     if (busy) return;
     setBusy(true);
     setMsg("");
 
+    // Prevent invalid check-in/out sequence
+    if (type === "in" && isCheckedIn) {
+      setMsg("⚠️ Already checked in. Please check out first.");
+      setBusy(false);
+      return;
+    }
+    if (type === "out" && !isCheckedIn) {
+      setMsg("⚠️ Cannot check out before checking in.");
+      setBusy(false);
+      return;
+    }
+
     try {
-      const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 10000 });
+      const pos = await getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+      });
       lastLocationRef.current = {
         latitude: pos.coords.latitude,
         longitude: pos.coords.longitude,
@@ -130,16 +161,20 @@ export default function AttendanceCapture() {
       };
 
       const image = await captureImageSafe();
-      if (!image) throw new Error("Could not capture image. Check camera permission.");
+      if (!image)
+        throw new Error("Could not capture image. Check camera permission.");
 
       const payload = { type, imageUrl: image, location: lastLocationRef.current };
+
       if (type === "in") {
         await checkIn(payload);
         setMsg("✅ Check-in marked successfully.");
+        setIsCheckedIn(true);
         startLocationPolling();
       } else {
         await checkOut(payload);
         setMsg("✅ Check-out marked successfully.");
+        setIsCheckedIn(false);
         stopLocationPolling();
       }
     } catch (e) {
