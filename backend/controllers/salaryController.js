@@ -45,7 +45,7 @@ export const createSalaryRecord = async (req, res) => {
     try {
       const payload = {
         base_salary: baseSalary,
-        hours_worked: hoursWorked || 160,
+        hours_worked: 50|| 50,
         leaves_taken: leavesTaken || 0,
         experience_years: experienceYears || 1,
       };
@@ -70,7 +70,7 @@ export const createSalaryRecord = async (req, res) => {
       deductions: deductions || 0,
       netSalary,
       predictedSalary,
-      hoursWorked: hoursWorked || 160,
+      hoursWorked: hoursWorked || 50,
       leavesTaken: leavesTaken || 0,
       experienceYears: experienceYears || 1,
     });
@@ -95,15 +95,11 @@ export const getMonthlyReport = async (req, res) => {
         message: "Month is required",
       });
     }
-
-    // ✅ Use regex match to handle full date or month-only formats
+   
     const report = await Salary.find({
-      month: { $regex: `^${month}` }, // match "2025-11" or "2025-11-01..."
+      month: { $regex: `^${month}` },
     });
 
-    console.log("Report found:", report.length, "for month:", month);
-
-    // ✅ Return cleaned data
     const formattedReport = report.map((r) => ({
       _id: r._id,
       employeeEmail: r.employee,
@@ -112,6 +108,8 @@ export const getMonthlyReport = async (req, res) => {
       baseSalary: r.baseSalary,
       predictedSalary: r.predictedSalary,
       netSalary: r.netSalary,
+      hoursWorked: r.hoursWorked || 0,
+      leavesTaken: r.leavesTaken || 0,
     }));
 
     res.status(200).json({
@@ -184,8 +182,8 @@ export const predictSalaryController = async (req, res) => {
     }
 
     // ✅ Use attendance hours if found, else fallback to provided/default
-    const finalHoursWorked =
-      totalHoursWorked > 0 ? totalHoursWorked : hoursWorked || 160;
+  const finalHoursWorked = totalHoursWorked > 0 ? totalHoursWorked : hoursWorked || 50;
+
 
     // ✅ Predict salary using ML API
     const payload = {

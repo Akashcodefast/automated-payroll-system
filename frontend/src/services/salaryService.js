@@ -13,7 +13,7 @@ export const predictForEmployee = async (payload) => {
   return api.post("/api/salary/predict", {
     email: payload.email,
     baseSalary: payload.baseSalary ?? 0,
-    hoursWorked: payload.hoursWorked ?? 160,
+    hoursWorked: payload.hoursWorked ?? 50,
     leavesTaken: payload.leavesTaken ?? 0,
     experienceYears: payload.experienceYears ?? 1,
     month: payload.month

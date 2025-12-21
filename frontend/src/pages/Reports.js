@@ -4,6 +4,7 @@ import SalarySummary from "../components/Dashboard/SalarySummary";
 import { useEffect, useState } from "react";
 import { getMonthlyReport } from "../services/salaryService";
 
+// ... your imports remain the same
 export default function Reports() {
   const [month, setMonth] = useState(() => {
     const d = new Date();
@@ -24,14 +25,26 @@ export default function Reports() {
   }, [month]);
 
   const exportCSV = () => {
-    const header = "Employee,TotalHours,Leaves,BaseSalary,PredictedSalary\n";
-    const body = rows
-      .map((r) => [r.employeeName, r.totalHours, r.leaves, r.baseSalary, r.predictedSalary].join(","))
+    if (!rows?.data?.length) return alert("No data to export!");
+
+    const header = ["Employee", "TotalHours", "Leaves", "BaseSalary", "PredictedSalary"].join(",") + "\n";
+
+    const body = rows.data
+      .map((r) =>
+        [r.employeeName, r.hoursWorked, r.leavesTaken, r.baseSalary, r.predictedSalary].join(",")
+      )
       .join("\n");
+
     const blob = new Blob([header + body], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
-    a.href = url; a.download = `salary_report_${month}.csv`; a.click();
+    a.href = url;
+    a.download = `salary_report_${month}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
     URL.revokeObjectURL(url);
   };
 
@@ -44,12 +57,33 @@ export default function Reports() {
           <h2>Reports</h2>
           <div style={{ marginBottom: 8 }}>
             <label>Month: </label>
-            <input value={month} onChange={(e) => setMonth(e.target.value)} placeholder="YYYY-MM" />
-            <button onClick={exportCSV} style={{ marginLeft: 8 }}>Export CSV</button>
+            <input
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              placeholder="YYYY-MM"
+            />
+            <button className="export-button" onClick={exportCSV} style={{ marginLeft: 8 }}>
+              Export CSV
+            </button>
           </div>
           <SalarySummary rows={rows} />
         </div>
       </div>
+
+      <style>{`
+        .export-button {
+          background-color: #4b5563; /* dull gray */
+          color: #fff;
+          border: none;
+          border-radius: 5px;
+          padding: 6px 12px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .export-button:hover {
+          background-color: #6b7280; /* slightly lighter on hover */
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import LoginForm from "../components/Auth/LoginForm";
+  import LoginForm from "../components/Auth/LoginForm";
 
-export default function Login() {
-  return (
-    <div style={{ padding: 16 }}>
-      <LoginForm />
-    </div>
-  );
-}
+  export default function Login() {
+    return (
+      <div style={{ padding: 16 }}>
+        <LoginForm />
+      </div>
+    );
+  }

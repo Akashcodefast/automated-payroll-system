@@ -24,7 +24,7 @@ export default function AdminDashboard() {
 
           {/* Employees Table */}
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">👥 Employees</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">👥</h2>
             {/* EmployeeTable now handles its own fetching */}
             <EmployeeTable />
           </div>
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
 
           {/* Predict Salary */}
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">📊 Predict Salary (Single Employee)</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">📊 Predict Salary (Using XGBoost)</h3>
             <PredictForm />
           </div>
         </div>

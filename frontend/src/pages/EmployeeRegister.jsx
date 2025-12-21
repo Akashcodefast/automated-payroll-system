@@ -32,6 +32,7 @@ const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-sys
     setShowWebcam(false);
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -40,28 +41,31 @@ const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-sys
       ...formData,
       baseSalary: Number(formData.baseSalary),
     };
-
     try {
-      const res = await axios.post(`https://automated-payroll-system.onrender.com/api/employee`, payload);
-      if (res.data.success) {
-        alert("Employee added successfully!");
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          role: "employee",
-          department: "",
-          baseSalary: "",
-          faceImage: "",
-        });
-        navigate("/employees");
-      } else {
-        alert(res.data.message || "Error adding employee");
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Error adding employee!");
-    }
+  const res = await axios.post(`${baseURL}/api/employee`, payload);
+  // Ignore any token in response
+  if (res.data.token) delete res.data.token;
+
+  if (res.data.success) {
+    alert("Employee added successfully!");
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      role: "employee",
+      department: "",
+      baseSalary: "",
+      faceImage: "",
+    });
+    
+  } else {
+    alert(res.data.message || "Error adding employee");
+  }
+} catch (err) {
+  console.error("Error:", err);
+  alert("Error adding employee!");
+}
+
   };
 
   return (
@@ -156,12 +160,28 @@ const baseURL = process.env.REACT_APP_API_BASE || "https://automated-payroll-sys
         </div>
       )}
 
-      <button
-        type="submit"
-        className="w-full bg-green-600  hover:bg-green-700"
-      >
-        Register Employee
-      </button>
+      <button type="submit" className="register-button">
+  Register Employee
+</button>
+
+<style>{`
+  .register-button {
+    width: 100%;
+    background-color: #16a34a; /* dull green */
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+  }
+
+  .register-button:hover {
+    background-color: #15803d; /* slightly darker on hover */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+`}</style>
+
     </form>
   );
 }
