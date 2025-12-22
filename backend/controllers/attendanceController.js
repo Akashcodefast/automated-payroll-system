@@ -111,7 +111,7 @@ export const markAttendance = async (req, res) => {
     if (!employee)
       return res.status(404).json({ message: "Employee not found" });
 
-    if (!isLocationValid(location, 500))
+    if (!isLocationValid(location, 50000))
       return res.status(401).json({ message: "❌ Location mismatch" });
 
     const faceMatch = await compareFaces(employee.faceImage, imageUrl);

@@ -9,21 +9,12 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
-  const onSubmit = async (e) => {
+ const onSubmit = async (e) => {
   e.preventDefault();
   setErr("");
   setLoading(true);
 
   try {
-    // 🔥 WAKE UP BACKEND (CRITICAL)
-    await fetch(import.meta.env.VITE_API_URL + "/ping", {
-      method: "GET",
-      cache: "no-store",
-    });
-
-    // small delay for cold start
-    await new Promise((r) => setTimeout(r, 1500));
-
     const payload = {
       email: form.email.trim().toLowerCase(),
       password: form.password.trim(),
@@ -40,12 +31,13 @@ export default function LoginForm() {
     setErr(
       e?.response?.data?.message ||
       e?.message ||
-      "Server waking up, try again"
+      "Login failed"
     );
   } finally {
     setLoading(false);
   }
 };
+
 
 
   return (

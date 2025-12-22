@@ -49,70 +49,141 @@ export default function EmployeeTable() {
         No employees found.
       </p>
     );
+     const cell = {
+    padding: "10px",
+    fontSize: "13px",
+    color: "#374151",
+  };
 
-  return (
-    <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          👥 Employees ({employees.length})
-        </h2>
-      </div>
-
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">#</th>
-            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Name</th>
-            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Role</th>
-            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Department</th>
-            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Salary</th>
-            <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Actions</th>
-          </tr>
-        </thead>
-
-        <tbody className="bg-white divide-y divide-gray-100">
-          {employees.map((e, idx) => (
-            <tr key={e._id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 text-gray-600">{idx + 1}</td>
-
-              <td className="px-6 py-4 font-medium text-gray-800">
-                {e.name || "N/A"}
-              </td>
-
-              <td className="px-6 py-4">
-                <span
-                  className={`px-2 text-xs font-semibold rounded-full ${
-                    e.role === "admin"
-                      ? "bg-red-100 text-red-800"
-                      : e.role === "hr"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {e.role}
-                </span>
-              </td>
-
-              <td className="px-6 py-4 text-gray-700">
-                {e.department || "N/A"}
-              </td>
-
-              <td className="px-6 py-4 font-semibold text-gray-900">
-                ₹{e.baseSalary ?? "N/A"}
-              </td>
-
-              <td className="px-6 py-4 text-center">
-                <button
-                  onClick={() => handleDelete(e._id)}
-                  className="bg-red-500 hover:bg-red-600 text-black px-3 py-1 rounded text-sm"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+ return (
+  <div
+    style={{
+      width: "100%",
+      overflowX: "auto",
+      backgroundColor: "#ffffff",
+      borderRadius: "16px",
+      boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+      padding: "16px",
+    }}
+    className="employee-table-wrapper"
+  >
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "12px",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "18px",
+          fontWeight: 600,
+          color: "#1f2937",
+        }}
+      >
+        👥 Employees ({employees.length})
+      </h2>
     </div>
-  );
+
+    <table
+      style={{
+        width: "100%",
+        minWidth: "720px", // KEY for mobile scroll
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead style={{ backgroundColor: "#f9fafb" }}>
+        <tr>
+          {["#", "Name", "Role", "Department", "Salary", "Actions"].map(
+            (h) => (
+              <th
+                key={h}
+                style={{
+                  padding: "10px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  color: "#6b7280",
+                  textAlign: h === "Actions" ? "center" : "left",
+                  borderBottom: "1px solid #e5e7eb",
+                }}
+              >
+                {h}
+              </th>
+            )
+          )}
+        </tr>
+      </thead>
+
+      <tbody>
+        {employees.map((e, idx) => (
+          <tr
+            key={e._id}
+            style={{
+              borderBottom: "1px solid #f1f5f9",
+            }}
+          >
+            <td style={cell}>{idx + 1}</td>
+            <td style={{ ...cell, fontWeight: 600 }}>{e.name || "N/A"}</td>
+            <td style={cell}>
+              <span
+                style={{
+                  padding: "4px 8px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  borderRadius: "999px",
+                  backgroundColor:
+                    e.role === "admin"
+                      ? "#fee2e2"
+                      : e.role === "hr"
+                      ? "#dbeafe"
+                      : "#dcfce7",
+                  color:
+                    e.role === "admin"
+                      ? "#991b1b"
+                      : e.role === "hr"
+                      ? "#1e40af"
+                      : "#166534",
+                }}
+              >
+                {e.role}
+              </span>
+            </td>
+            <td style={cell}>{e.department || "N/A"}</td>
+            <td style={{ ...cell, fontWeight: 600 }}>
+              ₹{e.baseSalary ?? "N/A"}
+            </td>
+            <td style={{ ...cell, textAlign: "center" }}>
+              <button
+                onClick={() => handleDelete(e._id)}
+                style={{
+                  backgroundColor: "#dc2626",
+                  color: "#fff",
+                  padding: "6px 10px",
+                  fontSize: "12px",
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {/* Responsive tweaks */}
+    <style>{`
+      @media (max-width: 640px) {
+        .employee-table-wrapper {
+          padding: 10px;
+        }
+      }
+    `}</style>
+  </div>
+);
+
 }

@@ -124,73 +124,139 @@ export default function AttendanceCapture() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 50, fontFamily: "Arial, sans-serif" }}>
-      {showCamera && <div style={{ border: "2px solid #2563eb", borderRadius: 12, padding: 10, marginBottom: 20 }}><WebcamView /></div>}
-
-      {!showCamera && (
-        <button
-          onClick={() => setShowCamera(true)}
-          disabled={busy}
-          style={{
-            backgroundColor: busy ? "#9ca3af" : "#2563eb",
-            color: "#fff",
-            padding: "12px 24px",
-            fontSize: 16,
-            border: "none",
-            borderRadius: 10,
-            cursor: busy ? "not-allowed" : "pointer",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-            transition: "background-color 0.3s, transform 0.2s",
-          }}
-        >
-          🎥 Open Camera
-        </button>
-      )}
-
-      <div style={{ display: "flex", gap: 20, marginTop: 20 }}>
-        <button
-          disabled={busy}
-          onClick={() => handleAttendance("in")}
-          style={{
-            backgroundColor: busy ? "#9ca3af" : "#16a34a",
-            color: "#fff",
-            padding: "12px 28px",
-            fontSize: 16,
-            fontWeight: "bold",
-            border: "none",
-            borderRadius: 10,
-            cursor: busy ? "not-allowed" : "pointer",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s, background-color 0.3s",
-          }}
-        >
-          ✅ Check In
-        </button>
-        <button
-          disabled={busy}
-          onClick={() => handleAttendance("out")}
-          style={{
-            backgroundColor: busy ? "#9ca3af" : "#dc2626",
-            color: "#fff",
-            padding: "12px 28px",
-            fontSize: 16,
-            fontWeight: "bold",
-            border: "none",
-            borderRadius: 10,
-            cursor: busy ? "not-allowed" : "pointer",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s, background-color 0.3s",
-          }}
-        >
-          ⛔ Check Out
-        </button>
+  <div
+    style={{
+      minHeight: "100vh",
+      padding: "16px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+      background: "linear-gradient(180deg, #f8fafc, #eef2ff)",
+    }}
+  >
+    {/* Camera Preview */}
+    {showCamera && (
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 360,
+          borderRadius: 16,
+          overflow: "hidden",
+          border: "3px solid #2563eb",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+          marginBottom: 20,
+        }}
+      >
+        <WebcamView />
       </div>
+    )}
 
-      {msg && (
-        <div style={{ marginTop: 20, fontWeight: "bold", color: msg.includes("❌") ? "#dc2626" : "#16a34a" }}>
-          {msg}
-        </div>
-      )}
+    {/* Open Camera */}
+    {!showCamera && (
+      <button
+        onClick={() => setShowCamera(true)}
+        disabled={busy}
+        style={{
+          width: "100%",
+          maxWidth: 360,
+          background: busy ? "#9ca3af" : "#2563eb",
+          color: "#fff",
+          padding: "14px",
+          fontSize: 16,
+          fontWeight: 600,
+          border: "none",
+          borderRadius: 14,
+          cursor: busy ? "not-allowed" : "pointer",
+          boxShadow: "0 8px 18px rgba(37,99,235,0.35)",
+          marginBottom: 20,
+        }}
+      >
+        🎥 Open Camera
+      </button>
+    )}
+
+    {/* Action Buttons */}
+    <div
+      style={{
+        width: "100%",
+        maxWidth: 360,
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+      }}
+    >
+      {/* Check In */}
+      <button
+        disabled={busy}
+        onClick={() => handleAttendance("in")}
+        style={{
+          width: "100%",
+          background: busy ? "#9ca3af" : "#16a34a",
+          color: "#fff",
+          padding: "16px",
+          fontSize: 17,
+          fontWeight: 700,
+          border: "none",
+          borderRadius: 14,
+          cursor: busy ? "not-allowed" : "pointer",
+          boxShadow: "0 8px 18px rgba(22,163,74,0.35)",
+        }}
+      >
+        ✅ Check In
+      </button>
+
+      {/* Check Out */}
+      <button
+        disabled={busy}
+        onClick={() => handleAttendance("out")}
+        style={{
+          width: "100%",
+          background: busy ? "#9ca3af" : "#dc2626",
+          color: "#fff",
+          padding: "16px",
+          fontSize: 17,
+          fontWeight: 700,
+          border: "none",
+          borderRadius: 14,
+          cursor: busy ? "not-allowed" : "pointer",
+          boxShadow: "0 8px 18px rgba(220,38,38,0.35)",
+        }}
+      >
+        ⛔ Check Out
+      </button>
     </div>
-  );
+
+    {/* Status Message */}
+    {msg && (
+      <div
+        style={{
+          marginTop: 24,
+          width: "100%",
+          maxWidth: 360,
+          padding: "12px 14px",
+          borderRadius: 12,
+          fontWeight: 600,
+          fontSize: 14,
+          textAlign: "center",
+          background: msg.includes("❌")
+            ? "#fee2e2"
+            : msg.includes("⚠️")
+            ? "#fef3c7"
+            : "#dcfce7",
+          color: msg.includes("❌")
+            ? "#991b1b"
+            : msg.includes("⚠️")
+            ? "#92400e"
+            : "#065f46",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        {msg}
+      </div>
+    )}
+  </div>
+);
+
 }

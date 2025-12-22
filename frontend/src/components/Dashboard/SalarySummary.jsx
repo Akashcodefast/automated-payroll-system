@@ -21,44 +21,105 @@ export default function SalarySummary() {
   useEffect(() => {
     fetchReport();
   }, [fetchReport]);
+  const td = {
+  padding: "10px",
+  fontSize: "13px",
+  color: "#374151",
+  border: "1px solid #e5e7eb",
+  whiteSpace: "nowrap",
+};
 
-  return (
-    <div className="overflow-x-auto p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-3">
-        Salary Report for {month}
-      </h2>
-      <table className="min-w-full border">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-4 py-2 border">Employee Name</th>
-            <th className="px-4 py-2 border">Email</th>
-            <th className="px-4 py-2 border">Department</th>
-            <th className="px-4 py-2 border">Base Salary</th>
-            <th className="px-4 py-2 border">Predicted Salary</th>
-            <th className="px-4 py-2 border">Net Salary</th>
-          </tr>
-        </thead>
-        <tbody>
-          {report.length ? (
-            report.map((row) => (
-              <tr key={row._id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border">{row.employeeName || "-"}</td>
-                <td className="px-4 py-2 border">{row.employeeEmail || "-"}</td>
-                <td className="px-4 py-2 border">{row.department || "-"}</td>
-                <td className="px-4 py-2 border">{row.baseSalary}</td>
-                <td className="px-4 py-2 border">{row.predictedSalary}</td>
-                <td className="px-4 py-2 border">{row.netSalary}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="px-4 py-2 text-center border">
-                No salary data available for {month}.
-              </td>
+
+return (
+  <div
+    className="salary-summary-wrapper"
+    style={{
+      width: "100%",
+      overflowX: "auto",
+      backgroundColor: "#ffffff",
+      borderRadius: "16px",
+      boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+      padding: "16px",
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "18px",
+        fontWeight: 600,
+        marginBottom: "12px",
+        color: "#1f2937",
+      }}
+    >
+      Salary Report for {month}
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        minWidth: "800px", // IMPORTANT for mobile scroll
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead style={{ backgroundColor: "#f9fafb" }}>
+        <tr>
+          {[
+            "Employee Name",
+            "Email",
+            "Department",
+            "Base Salary",
+            "Predicted Salary",
+            "Net Salary",
+          ].map((head) => (
+            <th
+              key={head}
+              style={{
+                padding: "10px",
+                fontSize: "12px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "#6b7280",
+                border: "1px solid #e5e7eb",
+                textAlign: "left",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {head}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {report.length ? (
+          report.map((row) => (
+            <tr key={row._id}>
+              <td style={td}>{row.employeeName || "-"}</td>
+              <td style={td}>{row.employeeEmail || "-"}</td>
+              <td style={td}>{row.department || "-"}</td>
+              <td style={td}>{row.baseSalary}</td>
+              <td style={td}>{row.predictedSalary}</td>
+              <td style={td}>{row.netSalary}</td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+          ))
+        ) : (
+          <tr>
+            <td colSpan="6" style={{ ...td, textAlign: "center" }}>
+              No salary data available for {month}.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+
+    {/* Mobile tweaks */}
+    <style>{`
+      @media (max-width: 640px) {
+        .salary-summary-wrapper {
+          padding: 10px;
+        }
+      }
+    `}</style>
+  </div>
+);
+
 }

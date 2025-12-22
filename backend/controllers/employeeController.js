@@ -77,7 +77,7 @@ export const getEmployeeById = async (req, res) => {
     console.error("Error fetching employee by ID:", err);
     res.status(500).json({
       success: false,
-      message: "Error fetching employee",
+      message: "Error fetching employee", 
       error: err.message,
     });
   }
