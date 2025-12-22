@@ -145,10 +145,10 @@ export default function PredictForm() {
           </td>
         </tr>
 
-        <tr>
+        {/* <tr>
           <th>Total Hours Worked</th>
           <td>{result.data.hoursWorked}</td>
-        </tr>
+        </tr> */}
 
         <tr>
           <th>Leaves Taken</th>

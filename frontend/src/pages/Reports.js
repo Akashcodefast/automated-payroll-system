@@ -27,11 +27,17 @@ export default function Reports() {
   const exportCSV = () => {
     if (!rows?.data?.length) return alert("No data to export!");
 
-    const header = ["Employee", "TotalHours", "Leaves", "BaseSalary", "PredictedSalary"].join(",") + "\n";
+   const header = [
+  "Employee",
+  "Leaves",
+  "BaseSalary",
+  "PredictedSalary",
+].join(",") + "\n";
+
 
     const body = rows.data
       .map((r) =>
-        [r.employeeName, r.hoursWorked, r.leavesTaken, r.baseSalary, r.predictedSalary].join(",")
+        [r.employeeName, r.leavesTaken, r.baseSalary, r.predictedSalary].join(",")
       )
       .join("\n");
 
