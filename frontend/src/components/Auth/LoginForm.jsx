@@ -10,47 +10,43 @@ export default function LoginForm() {
   const nav = useNavigate();
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    setErr("");
-    setLoading(true);
+  e.preventDefault();
+  setErr("");
+  setLoading(true);
 
-    try {
-      // ✅ FIX: sanitize input (mobile-safe)
-      const payload = {
-        email: form.email.trim().toLowerCase(),
-        password: form.password.trim(),
-      };
+  try {
+    // 🔥 WAKE UP BACKEND (CRITICAL)
+    await fetch(import.meta.env.VITE_API_URL + "/ping", {
+      method: "GET",
+      cache: "no-store",
+    });
 
-      const res = await login(payload);
-      const { token, user } = res;
+    // small delay for cold start
+    await new Promise((r) => setTimeout(r, 1500));
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", user.role);
+    const payload = {
+      email: form.email.trim().toLowerCase(),
+      password: form.password.trim(),
+    };
 
-      nav(user.role === "admin" ? "/admin" : "/employee", {
-        replace: true,
-      });
-    }catch (e) {
-  console.log("LOGIN ERROR:", e);
+    const res = await login(payload);
+    const { token, user } = res;
 
-  if (e.response) {
-    // Backend responded (most important)
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", user.role);
+
+    nav(user.role === "admin" ? "/admin" : "/employee", { replace: true });
+  } catch (e) {
     setErr(
-      e.response.data?.message ||
-      `Login failed (status ${e.response.status})`
+      e?.response?.data?.message ||
+      e?.message ||
+      "Server waking up, try again"
     );
-  } else if (e.request) {
-    // Request sent but no response (mobile network / CORS / Render sleep)
-    setErr("Server not responding. Please try again.");
-  } else {
-    // Something else
-    setErr(e.message || "Unexpected login error");
+  } finally {
+    setLoading(false);
   }
-}
- finally {
-      setLoading(false);
-    }
-  };
+};
+
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4 sm:px-6 lg:px-8">
