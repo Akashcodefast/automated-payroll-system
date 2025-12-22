@@ -1,8 +1,10 @@
 import axios from "axios";
 
 // ✅ CRA ENV (THIS IS CORRECT FOR YOU)
-const baseURL =
-  process.env.REACT_APP_API_BASE || "http://localhost:8080";
+
+ const baseURL =
+  process.env.REACT_APP_API_BASE ||
+  "https://automated-payroll-system.onrender.com";
 
 const API = `${baseURL}/api/auth`;
 console.log("API BASE:", process.env.REACT_APP_API_BASE);
