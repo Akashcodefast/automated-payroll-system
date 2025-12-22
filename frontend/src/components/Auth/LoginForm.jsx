@@ -8,17 +8,28 @@ export default function LoginForm() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setErr("");
     setLoading(true);
 
     try {
-      const res = await login(form);
+      // ✅ FIX: sanitize input (mobile-safe)
+      const payload = {
+        email: form.email.trim().toLowerCase(),
+        password: form.password.trim(),
+      };
+
+      const res = await login(payload);
       const { token, user } = res;
+
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
-      nav(user.role === "admin" ? "/admin" : "/employee", { replace: true });
+
+      nav(user.role === "admin" ? "/admin" : "/employee", {
+        replace: true,
+      });
     } catch (e) {
       setErr(e?.response?.data?.message || "Login failed");
     } finally {
@@ -49,8 +60,13 @@ export default function LoginForm() {
                 type="email"
                 placeholder="you@example.com"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
                 required
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -63,8 +79,12 @@ export default function LoginForm() {
                 type="password"
                 placeholder="••••••••"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, password: e.target.value })
+                }
                 required
+                autoCapitalize="none"
+                autoCorrect="off"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
