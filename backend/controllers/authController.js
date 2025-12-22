@@ -28,18 +28,51 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  console.log("hi hi");
   try {
     const { email, password } = req.body;
+
+    // 🔍 Debug (visible in Render logs)
+    console.log("LOGIN ATTEMPT:", email);
+
     const user = await Employee.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
 
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(400).json({ message: "Invalid credentials" });
-    console.log(user);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password",
+      });
+    }
 
-    res.json({ token: sign(user._id, user.role), user: { id: user._id, name: user.name, role: user.role } });
-  } catch (e) {
-    res.status(500).json({ message: "Login failed", error: e.message });
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error during login",
+      error: err.message,
+    });
   }
 };

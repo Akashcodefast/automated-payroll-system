@@ -30,9 +30,24 @@ export default function LoginForm() {
       nav(user.role === "admin" ? "/admin" : "/employee", {
         replace: true,
       });
-    } catch (e) {
-      setErr(e?.response?.data?.message || "Login failed");
-    } finally {
+    }catch (e) {
+  console.log("LOGIN ERROR:", e);
+
+  if (e.response) {
+    // Backend responded (most important)
+    setErr(
+      e.response.data?.message ||
+      `Login failed (status ${e.response.status})`
+    );
+  } else if (e.request) {
+    // Request sent but no response (mobile network / CORS / Render sleep)
+    setErr("Server not responding. Please try again.");
+  } else {
+    // Something else
+    setErr(e.message || "Unexpected login error");
+  }
+}
+ finally {
       setLoading(false);
     }
   };
